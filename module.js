@@ -42,7 +42,7 @@ import init, { test_alert, new_info,
                 body:  null,
                 parts: null
             },
-            info  : JSON.parse(new_info()),
+            info  : JSON.parse(new_info(2)),
             head  : null,
             body  : null,
             parts : null,
