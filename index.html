@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rust Wasm Example with Multiple Functions</title>
+    <script type="importmap">
+        {
+            "imports": {
+                "wasm_module": "./model_maker.js"
+            }
+        }
+    </script>
+    <script type="module" src="./module.js"></script>
+    <link href="./main.css" rel="stylesheet" type="text/css" />
+</head>
+<body>
+    <div class="container">
+        <button onclick="new_model()">신규생성</button>
+        <h1>캐릭터 정보</h1>
+        <div class="character-info" id="main_container">
+            <div class="character-image">
+                <section id="draw_section"></section>
+            </div>
+            <div class="character-details">
+                <h2 id="model_name">이름</h2>
+                <section id="model_info">
+                    <p><strong>나이</strong></p>
+                    <p><strong>키</strong></p>
+                    <p><strong>무게</strong></p>
+                    <p><strong>BMI</strong></p>
+                </section>
+                <h3>List</h3>
+                <section class="character-info" id="model_list">
+                    <div class="column" id="model_list_X"><strong>X </strong><span id="X_name"></span></div>
+                    <div class="column" id="model_list_Y"><strong>Y </strong><span id="Y_name"></span></div>
+                </section>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
