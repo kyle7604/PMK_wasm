@@ -7,7 +7,7 @@
     <script type="importmap">
         {
             "imports": {
-                "wasm_module": "./model_maker.js"
+                "wasm_module": "../pkg/model_maker.js"
             }
         }
     </script>
@@ -16,7 +16,7 @@
 </head>
 <body>
     <div class="container">
-        <button onclick="new_model()">신규생성</button>
+        <button onclick="new_model(2)">신규생성</button>
         <h1>캐릭터 정보</h1>
         <div class="character-info" id="main_container">
             <div class="character-image">
