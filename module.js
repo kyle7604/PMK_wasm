@@ -10,6 +10,7 @@ import init, { test_alert, new_info,
     let lip_direction = true;
     let fepart_ext = 0;
     let fepart_ert = 0;
+    let flutter    = 0;
 
     function image_resize() {
         const container_width = document.getElementById("main_container").offsetWidth;
@@ -24,7 +25,7 @@ import init, { test_alert, new_info,
         image_resize();
     })
 
-    window.new_model = async function() {        
+    window.new_model = async function(model_class) {        
         await init();  // WebAssembly 모듈 초기화
         const model = {
             mother : {
@@ -42,7 +43,7 @@ import init, { test_alert, new_info,
                 body:  null,
                 parts: null
             },
-            info  : JSON.parse(new_info(2)),
+            info  : JSON.parse(new_info(model_class)),
             head  : null,
             body  : null,
             parts : null,
@@ -234,6 +235,18 @@ import init, { test_alert, new_info,
                 let lip_other_m = !side?-model.lip_i_length_rm+lip_smallest:model.lip_i_length_lm-lip_smallest;
                 let lip_other_d = !side?-model.lip_i_length_rd+lip_smallest:model.lip_i_length_ld-lip_smallest;
                 const width_lip = model.lip_i_width*extention_ratio[1];
+                const side_lip_width_ratio = 3;
+                if(!side){
+                    const side_lip_width = -model.lip_i_width/side_lip_width_ratio;
+                    if(lip_other_u>side_lip_width) lip_other_u=side_lip_width;
+                    if(lip_other_m>side_lip_width) lip_other_m=side_lip_width;
+                    if(lip_other_d>side_lip_width) lip_other_d=side_lip_width;
+                }else{
+                    const side_lip_width = model.lip_i_width/side_lip_width_ratio;
+                    if(lip_other_u<side_lip_width) lip_other_u=side_lip_width;
+                    if(lip_other_m<side_lip_width) lip_other_m=side_lip_width;
+                    if(lip_other_d<side_lip_width) lip_other_d=side_lip_width;
+                }
                 lip_other_u = !side? lip_other_u+width_lip:lip_other_u-width_lip;
                 lip_other_m = !side? lip_other_m+width_lip:lip_other_m-width_lip;
                 lip_other_d = !side? lip_other_d+width_lip:lip_other_d-width_lip;
@@ -474,7 +487,18 @@ import init, { test_alert, new_info,
             let lip_i_m = side?-model.lip_i_length_rm+lip_smallest:model.lip_i_length_lm-lip_smallest;
             let lip_i_d = side?-model.lip_i_length_rd+lip_smallest:model.lip_i_length_ld-lip_smallest;
             const width_lip = lip_width*extention_ratio[1];
-            
+            const side_lip_width_ratio = 3;
+            if(side){
+                const side_lip_width = -lip_width/side_lip_width_ratio;
+                if(lip_i_u>side_lip_width) lip_i_u=side_lip_width;
+                if(lip_i_m>side_lip_width) lip_i_m=side_lip_width;
+                if(lip_i_d>side_lip_width) lip_i_d=side_lip_width;
+            }else{
+                const side_lip_width = lip_width/side_lip_width_ratio;
+                if(lip_i_u<side_lip_width) lip_i_u=side_lip_width;
+                if(lip_i_m<side_lip_width) lip_i_m=side_lip_width;
+                if(lip_i_d<side_lip_width) lip_i_d=side_lip_width;
+            }
             if(inout){
                 lip_i_u = side? lip_i_u+width_lip:lip_i_u-width_lip;
                 lip_i_m = side? lip_i_m+width_lip:lip_i_m-width_lip;
@@ -555,10 +579,14 @@ import init, { test_alert, new_info,
         canvas.beginPath();
         const axis_E = init_point + model.hood_length + model.lip_i_length;
         const axis_Y = axis_E + model.perineum_l;
+        flutter += (Math.random())-0.49;
+        if(flutter>ratio)  flutter = ratio;
+        else if(flutter<0) flutter = 0;
         for (let index = 0; index < wrinkle.length; index++) {
             const dynamic = [(110-Math.random()*20)/100,(110-Math.random()*20)/100]; //90~110%;
-            canvas.moveTo(center, axis_Y);
-            canvas.lineTo(center+dynamic[0]*wrinkle[index][0]*wrinkle[index][1], axis_Y+dynamic[1]*wrinkle[index][0]*wrinkle[index][2]);
+            canvas.moveTo(center+flutter*wrinkle[index][1], axis_Y+flutter*wrinkle[index][2]);
+            canvas.lineTo(center+flutter*wrinkle[index][1] + dynamic[0]*wrinkle[index][0]*wrinkle[index][1],
+                          axis_Y+flutter*wrinkle[index][2] + dynamic[1]*wrinkle[index][0]*wrinkle[index][2]);
         }
         canvas.stroke();
     }
