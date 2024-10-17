@@ -5,6 +5,7 @@ import init, { test_alert, new_info,
     
     const model_list = {X:[],Y:[]};
     const target = {type:null,index:null};
+    const side_lip_width_ratio = 3;
     let mother   = null, father = null;
     let wrinkle  = [];
     let lip_direction = true;
@@ -204,6 +205,15 @@ import init, { test_alert, new_info,
 
             let lip_i_u = side?-model.lip_i_length_ru+lip_smallest:model.lip_i_length_lu-lip_smallest;
             let lip_i_m = side?-model.lip_i_length_rm+lip_smallest:model.lip_i_length_lm-lip_smallest;
+            if(side){
+                const side_lip_width = -model.lip_i_width/side_lip_width_ratio;
+                if(lip_i_u>side_lip_width) lip_i_u=side_lip_width;
+                if(lip_i_m>side_lip_width) lip_i_m=side_lip_width;
+            }else{
+                const side_lip_width = model.lip_i_width/side_lip_width_ratio;
+                if(lip_i_u<side_lip_width) lip_i_u=side_lip_width;
+                if(lip_i_m<side_lip_width) lip_i_m=side_lip_width;
+            }
             // 클리핑 영역 설정
             canvas.beginPath();
             if(side) canvas.moveTo(0,0);
@@ -235,7 +245,6 @@ import init, { test_alert, new_info,
                 let lip_other_m = !side?-model.lip_i_length_rm+lip_smallest:model.lip_i_length_lm-lip_smallest;
                 let lip_other_d = !side?-model.lip_i_length_rd+lip_smallest:model.lip_i_length_ld-lip_smallest;
                 const width_lip = model.lip_i_width*extention_ratio[1];
-                const side_lip_width_ratio = 3;
                 if(!side){
                     const side_lip_width = -model.lip_i_width/side_lip_width_ratio;
                     if(lip_other_u>side_lip_width) lip_other_u=side_lip_width;
@@ -487,7 +496,6 @@ import init, { test_alert, new_info,
             let lip_i_m = side?-model.lip_i_length_rm+lip_smallest:model.lip_i_length_lm-lip_smallest;
             let lip_i_d = side?-model.lip_i_length_rd+lip_smallest:model.lip_i_length_ld-lip_smallest;
             const width_lip = lip_width*extention_ratio[1];
-            const side_lip_width_ratio = 3;
             if(side){
                 const side_lip_width = -lip_width/side_lip_width_ratio;
                 if(lip_i_u>side_lip_width) lip_i_u=side_lip_width;
