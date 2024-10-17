@@ -185,126 +185,45 @@ import init, { test_alert, new_info,
     }
     
     function fepart_top(canvas,init_point,center,model,extention,erection,center_add) {
+
+        const config_axis = config_axis_Y(init_point,model,erection);
+        let config_shape  = null;
+
         const extention_ratio = [extention/100,(100-extention)/100];
         const erection_ratio  = [erection/100,(100-erection)/100];
-        const rclit_y    = model.core_l_e/2*erection_ratio[0]+model.core_l/2*erection_ratio[1];
-        const axis_Y     = init_point + model.hood_length;
-        const axis_E     = axis_Y + model.lip_i_length;
-        
+
         function top_pair(side) {
-            const fix_center = side? center-center_add:center+center_add;
-            let   lip_smallest   = 0;
-
-            if(side){
-                lip_smallest = model.lip_i_length_ru<model.lip_i_length_rm?model.lip_i_length_ru:model.lip_i_length_rm;
-                lip_smallest = lip_smallest<model.lip_i_length_rd?lip_smallest:model.lip_i_length_rd;
-            }else{
-                lip_smallest = model.lip_i_length_lu<model.lip_i_length_lm?model.lip_i_length_lu:model.lip_i_length_lm;
-                lip_smallest = lip_smallest<model.lip_i_length_ld?lip_smallest:model.lip_i_length_ld;
-            }
-            lip_smallest = lip_smallest*extention_ratio[1];
-
-            let lip_i_u = side?-model.lip_i_length_ru+lip_smallest:model.lip_i_length_lu-lip_smallest;
-            let lip_i_m = side?-model.lip_i_length_rm+lip_smallest:model.lip_i_length_lm-lip_smallest;
-            let lip_i_d = side?-model.lip_i_length_rd+lip_smallest:model.lip_i_length_ld-lip_smallest;
-
-            let extention_temp = (50-extention)/100;
-            if(extention_temp<0) extention_temp = 0;
-            lip_i_u = lip_i_u*extention_ratio[0] - lip_i_u*extention_temp;
-            lip_i_m = lip_i_m*extention_ratio[0] - lip_i_m*extention_temp;
-            lip_i_d = lip_i_d*extention_ratio[0] - lip_i_d*extention_temp;
-
             // 클리핑 영역 설정
             canvas.beginPath();
-            if(side) canvas.moveTo(0,0);
-            else     canvas.moveTo(center,0);
-            canvas.lineTo(center, 0);
-            canvas.lineTo(center, axis_Y + rclit_y/3);
+            if(side) canvas.moveTo(0,init_point);
+            else     canvas.moveTo(center*2,init_point);
+            canvas.lineTo(center, init_point);
+            canvas.lineTo(center, config_axis.axis_Y + config_axis.rclit_Y/3);
 
-            canvas.bezierCurveTo(
-                fix_center +  lip_i_u/4, axis_Y + rclit_y/3 + model.lip_i_length/15,
-                fix_center +  lip_i_u/2, axis_Y + model.lip_i_length*2/15,
-                fix_center +  lip_i_u*3/4, axis_Y + model.lip_i_length*3/15,
-                );
-            canvas.bezierCurveTo(
-                fix_center +  lip_i_u, axis_Y + model.lip_i_length*4/15,
-                fix_center +  (2*lip_i_u+lip_i_m)/3, axis_Y + model.lip_i_length*5/15,
-                fix_center +  (lip_i_u+2*lip_i_m)/3, axis_Y + model.lip_i_length*6/15,
-                );
-            canvas.bezierCurveTo(
-                fix_center + lip_i_m, axis_Y + model.lip_i_length*7/15,
-                fix_center + lip_i_m, axis_Y + model.lip_i_length*8/15,
-                fix_center + (lip_i_d+2*lip_i_m)/3, axis_Y + model.lip_i_length*9/15
-                );
-            canvas.bezierCurveTo(
-                fix_center + (2*lip_i_d+lip_i_m)/3, axis_Y + model.lip_i_length*10/15,
-                fix_center + lip_i_d, axis_Y + model.lip_i_length*11/15,
-                fix_center + lip_i_d*3/4, axis_Y + model.lip_i_length*12/15
-                );
-            canvas.bezierCurveTo(
-                fix_center + lip_i_d/2, axis_Y + model.lip_i_length*13/15,
-                fix_center + lip_i_d/4, axis_Y + model.lip_i_length*14/15,
-                center, axis_E
-                );
+            config_shape = config_wing(side,false,center,center_add,model,extention);
+            draw_wing(canvas,config_shape,config_axis);
 
             let side_x_axis = side?0:center*2;
-            canvas.lineTo(side_x_axis,axis_E);
-            canvas.lineTo(side_x_axis,0);
-            canvas.stroke();
+            canvas.lineTo(side_x_axis,config_axis.axis_Y_end);
+            canvas.lineTo(side_x_axis,init_point);
+            // canvas.stroke();
             canvas.closePath();
             canvas.save(); // 현재 캔버스 상태 저장
-            canvas.clip(); // 현재 경로를 클리핑 영역으로 설정
+            canvas.clip(); // 현재 경로를 클리핑 영역으로 설정  
 
             if(side!=lip_direction){
-                // 안으로 먹는경우 클리핑 영역
-                let lip_other_u = !side?-model.lip_i_length_ru+lip_smallest:model.lip_i_length_lu-lip_smallest;
-                let lip_other_m = !side?-model.lip_i_length_rm+lip_smallest:model.lip_i_length_lm-lip_smallest;
-                let lip_other_d = !side?-model.lip_i_length_rd+lip_smallest:model.lip_i_length_ld-lip_smallest;
-                const width_lip = model.lip_i_width*extention_ratio[1];
- 
-                lip_other_u = lip_other_u*extention_ratio[0] - lip_other_u*extention_temp;
-                lip_other_m = lip_other_m*extention_ratio[0] - lip_other_m*extention_temp;
-                lip_other_d = lip_other_d*extention_ratio[0] - lip_other_d*extention_temp;
-                
-                lip_other_u = !side? lip_other_u+width_lip:lip_other_u-width_lip;
-                lip_other_m = !side? lip_other_m+width_lip:lip_other_m-width_lip;
-                lip_other_d = !side? lip_other_d+width_lip:lip_other_d-width_lip;
-
                 canvas.beginPath();
-                if(side) canvas.moveTo(0,0);
-                else     canvas.moveTo(center,0);
+                if(side) canvas.moveTo(0,init_point);
+                else     canvas.moveTo(center*2,init_point);
                 canvas.lineTo(center, 0);
-                canvas.lineTo(center, axis_Y + rclit_y/3);
-                canvas.bezierCurveTo(
-                    fix_center +  lip_other_u/4, axis_Y + rclit_y/3 + model.lip_i_length/15,
-                    fix_center +  lip_other_u/2, axis_Y + model.lip_i_length*2/15,
-                    fix_center +  lip_other_u*3/4, axis_Y + model.lip_i_length*3/15,
-                    );
-                canvas.bezierCurveTo(
-                    fix_center +  lip_other_u, axis_Y + model.lip_i_length*4/15,
-                    fix_center +  (2*lip_other_u+lip_other_m)/3, axis_Y + model.lip_i_length*5/15,
-                    fix_center +  (lip_other_u+2*lip_other_m)/3, axis_Y + model.lip_i_length*6/15,
-                    );
-                canvas.bezierCurveTo(
-                    fix_center + lip_other_m, axis_Y + model.lip_i_length*7/15,
-                    fix_center + lip_other_m, axis_Y + model.lip_i_length*8/15,
-                    fix_center + (lip_other_d+2*lip_other_m)/3, axis_Y + model.lip_i_length*9/15
-                    );
-                canvas.bezierCurveTo(
-                    fix_center + (2*lip_other_d+lip_other_m)/3, axis_Y + model.lip_i_length*10/15,
-                    fix_center + lip_other_d, axis_Y + model.lip_i_length*11/15,
-                    fix_center + lip_other_d*3/4, axis_Y + model.lip_i_length*12/15
-                    );
-                canvas.bezierCurveTo(
-                    fix_center + lip_other_d/2, axis_Y + model.lip_i_length*13/15,
-                    fix_center + lip_other_d/4, axis_Y + model.lip_i_length*14/15,
-                    center, axis_E
-                    );
+                canvas.lineTo(center, config_axis.axis_Y + config_axis.rclit_Y/3);
 
+                const config_shape_other = config_wing(!side,true,center,center_add,model,extention);
+                draw_wing(canvas,config_shape_other,config_axis);
 
-                canvas.lineTo(side_x_axis,axis_E);
-                canvas.lineTo(side_x_axis,0);
-                canvas.stroke();
+                canvas.lineTo(side_x_axis,config_axis.axis_Y_end);
+                canvas.lineTo(side_x_axis,init_point);
+                // canvas.stroke();
                 canvas.closePath();
                 canvas.save(); // 현재 캔버스 상태 저장
                 canvas.clip(); // 현재 경로를 클리핑 영역으로 설정
@@ -330,55 +249,58 @@ import init, { test_alert, new_info,
                 return respose;
             }
 
-            let middle_point = middle_point_set((rclit_x + lip_i_u*3/4)*extention_ratio[0] + (lip_i_u+2*lip_i_m-rclit_x*2)/3*extention_ratio[1],(lip_width+center_add)/2);
+            let middle_point = middle_point_set((rclit_x + config_shape.minora_width_u*3/4)*extention_ratio[0] + (config_shape.minora_width_u+2*config_shape.minora_width_m-rclit_x*2)/3*extention_ratio[1],(lip_width+center_add)/2);
             if(model.hood_start<model.hood_width*2/3){
                 canvas.moveTo(center, init_point);
             }else{
                 canvas.moveTo(center+hood_start, init_point);
-            }            
+            }
+
             canvas.bezierCurveTo(
                 center + hood_start, init_point,
-                center + hood_width, axis_Y  + rclit_y/3*2,
-                center + middle_point, axis_Y + model.lip_i_length*6/15
+                center + hood_width, config_axis.axis_Y  + config_axis.rclit_Y/3*2,
+                center + middle_point, config_axis.axis_Y + model.lip_i_length*6/15
                 );            
             //outer
-            middle_point = middle_point_set((lip_i_u+2*lip_i_m)/3,lip_width+center_add);
+            middle_point = middle_point_set((config_shape.minora_width_u+2*config_shape.minora_width_m)/3,lip_width+center_add);
             canvas.moveTo(center+hood_start+outer_start, init_point);
             canvas.bezierCurveTo(
                 center + hood_start,           init_point,
-                center + hood_width + rclit_x, axis_Y + rclit_y/3*2,
-                center + middle_point, axis_Y + model.lip_i_length*6/15
+                center + hood_width + rclit_x, config_axis.axis_Y + config_axis.rclit_Y/3*2,
+                center + middle_point, config_axis.axis_Y + model.lip_i_length*6/15
                 );
             canvas.quadraticCurveTo(
-                center + middle_point*2/3, axis_Y + model.lip_i_length*10/15,
-                center + outer_start, axis_E
+                center + middle_point*2/3, config_axis.axis_Y + model.lip_i_length*10/15,
+                center + outer_start, config_axis.axis_Y_end
                 );
             // hood
-            middle_point = middle_point_set(lip_i_u*3/4,(lip_width+center_add)/2);
-            canvas.moveTo(center, axis_Y - rclit_y);
+            middle_point = middle_point_set(config_shape.minora_width_u*3/4,(lip_width+center_add)/2);
+            canvas.moveTo(center, config_axis.axis_Y - config_axis.rclit_Y);
             canvas.bezierCurveTo(
-                center + rclit_x,     axis_Y - rclit_y,
-                center + (2*rclit_x+middle_point)/3,     axis_Y + rclit_y/3,
-                center + middle_point, axis_Y + model.lip_i_length*6/15
+                center + rclit_x,     config_axis.axis_Y - config_axis.rclit_Y,
+                center + (2*rclit_x+middle_point)/3,     config_axis.axis_Y + config_axis.rclit_Y/3,
+                center + middle_point, config_axis.axis_Y + model.lip_i_length*6/15
                 );
             canvas.quadraticCurveTo(
-                center + middle_point*2/3, axis_Y + model.lip_i_length*10/15,
-                center, axis_E
+                center + middle_point*2/3, config_axis.axis_Y + model.lip_i_length*10/15,
+                center, config_axis.axis_Y_end
                 );
             //clit
-            canvas.moveTo(center, axis_Y - rclit_y);
+            canvas.moveTo(center, config_axis.axis_Y - config_axis.rclit_Y);
             canvas.bezierCurveTo(
-                center + rclit_x, axis_Y - rclit_y,
-                center + rclit_x, axis_Y + rclit_y,
-                center,           axis_Y + rclit_y/3,
+                center + rclit_x, config_axis.axis_Y - config_axis.rclit_Y,
+                center + rclit_x, config_axis.axis_Y + config_axis.rclit_Y,
+                center,           config_axis.axis_Y + config_axis.rclit_Y/3,
                 );              
             canvas.stroke();
+
             if(side!=lip_direction) canvas.restore(); // 이전 캔버스 상태로 복원 (클리핑 해제)
             canvas.restore(); // 이전 캔버스 상태로 복원 (클리핑 해제)
         }
         top_pair(true);
         top_pair(false);
-    }
+    }  
+
     function fepart_inner(canvas,init_point,center,model,extention,erection) {
         const extention_ratio = [extention/100,(100-extention)/100];
         const erection_ratio  = [erection/100,(100-erection)/100];
@@ -389,7 +311,7 @@ import init, { test_alert, new_info,
 
         let axis_Y = init_point + model.hood_length;
         canvas.beginPath();
-        const rclit_y = model.core_l_e/2*extention_ratio[0]+model.core_l/2*extention_ratio[1];
+        const rclit_Y = model.core_l_e/2*extention_ratio[0]+model.core_l/2*extention_ratio[1];
         let lip_smallest = (model.lip_i_length_ru+model.lip_i_length_lu)<(model.lip_i_length_rm+model.lip_i_length_lm)?(model.lip_i_length_ru+model.lip_i_length_lu):(model.lip_i_length_rm+model.lip_i_length_lm);
             lip_smallest = lip_smallest<(model.lip_i_length_rd+model.lip_i_length_ld)?lip_smallest:(model.lip_i_length_rd+model.lip_i_length_ld);
             lip_smallest = lip_smallest*extention_ratio[1];
@@ -398,7 +320,7 @@ import init, { test_alert, new_info,
         lip_i_u = lip_i_u-model.lip_i_width*extention_ratio[1]>0?lip_i_u-model.lip_i_width*extention_ratio[1]:0;
         lip_i_d = lip_i_d-model.lip_i_width*extention_ratio[1]>0?lip_i_d-model.lip_i_width*extention_ratio[1]:0;
         
-        axis_Y += rclit_y*extention_ratio[1] + model.cu_distance/3*extention_ratio[0];
+        axis_Y += rclit_Y*extention_ratio[1] + model.cu_distance/3*extention_ratio[0];
         canvas.moveTo(center, axis_Y);
 
         canvas.bezierCurveTo(
@@ -488,114 +410,129 @@ import init, { test_alert, new_info,
         canvas.fill();
         canvas.restore(); // 이전 캔버스 상태로 복원 (클리핑 해제)
     }
-    function fepart_wing(canvas,init_point,center,model,extention,erection,center_add) {
-        const extention_ratio = [extention/100,(100-extention)/100];
+    ////--------------------- config ---------------------//
+    function config_axis_Y(init_point,model,erection) {
         const erection_ratio  = [erection/100,(100-erection)/100];
-        
-        const rclit_y    = model.core_l_e/2*erection_ratio[0]+model.core_l/2*erection_ratio[1];
-        const axis_Y = init_point + model.hood_length;
-        const axis_E = axis_Y + model.lip_i_length;
-
-        function wing_pair(side,lip_width,inout) {
-            const fix_center = side? center-center_add:center+center_add;
-            function wing_draw(lip_i_length_u,lip_i_length_m,lip_i_length_d){
-                canvas.moveTo(center, axis_Y + rclit_y/3);
-                canvas.bezierCurveTo(
-                    fix_center + lip_i_length_u/4, axis_Y + rclit_y/3 + model.lip_i_length/15,
-                    fix_center + lip_i_length_u/2, axis_Y + model.lip_i_length*2/15,
-                    fix_center + lip_i_length_u*3/4, axis_Y + model.lip_i_length*3/15,
-                    );
-                canvas.bezierCurveTo(
-                    fix_center + lip_i_length_u, axis_Y + model.lip_i_length*4/15,
-                    fix_center + (2*lip_i_length_u+lip_i_length_m)/3, axis_Y + model.lip_i_length*5/15,
-                    fix_center + (lip_i_length_u+2*lip_i_length_m)/3, axis_Y + model.lip_i_length*6/15,
-                    );
-                canvas.bezierCurveTo(
-                    fix_center + lip_i_length_m, axis_Y + model.lip_i_length*7/15,
-                    fix_center + lip_i_length_m, axis_Y + model.lip_i_length*8/15,
-                    fix_center + (lip_i_length_d+2*lip_i_length_m)/3, axis_Y + model.lip_i_length*9/15
-                    );
-                canvas.bezierCurveTo(
-                    fix_center + (2*lip_i_length_d+lip_i_length_m)/3, axis_Y + model.lip_i_length*10/15,
-                    fix_center + lip_i_length_d, axis_Y + model.lip_i_length*11/15,
-                    fix_center + lip_i_length_d*3/4, axis_Y + model.lip_i_length*12/15
-                    );
-                canvas.bezierCurveTo(
-                    fix_center + lip_i_length_d/2, axis_Y + model.lip_i_length*13/15,
-                    fix_center + lip_i_length_d/4, axis_Y + model.lip_i_length*14/15,
-                    center, axis_E
-                    );
-            }
-
-            let   lip_smallest   = 0;
-            if(side){
-                lip_smallest = model.lip_i_length_ru<model.lip_i_length_rm?model.lip_i_length_ru:model.lip_i_length_rm;
-                lip_smallest = lip_smallest<model.lip_i_length_rd?lip_smallest:model.lip_i_length_rd;
-            }else{
-                lip_smallest = model.lip_i_length_lu<model.lip_i_length_lm?model.lip_i_length_lu:model.lip_i_length_lm;
-                lip_smallest = lip_smallest<model.lip_i_length_ld?lip_smallest:model.lip_i_length_ld;
-            }
-            lip_smallest = lip_smallest*extention_ratio[1];
-
-            let lip_i_u = side?-model.lip_i_length_ru+lip_smallest:model.lip_i_length_lu-lip_smallest;
-            let lip_i_m = side?-model.lip_i_length_rm+lip_smallest:model.lip_i_length_lm-lip_smallest;
-            let lip_i_d = side?-model.lip_i_length_rd+lip_smallest:model.lip_i_length_ld-lip_smallest;
-            const width_lip = lip_width*extention_ratio[1];
-
-            let extention_temp = (50-extention)/100;
-            if(extention_temp<0) extention_temp = 0;
-            lip_i_u = lip_i_u*extention_ratio[0] - lip_i_u*extention_temp;
-            lip_i_m = lip_i_m*extention_ratio[0] - lip_i_m*extention_temp;
-            lip_i_d = lip_i_d*extention_ratio[0] - lip_i_d*extention_temp;
-
-            if(inout){
-                lip_i_u = side? lip_i_u+width_lip:lip_i_u-width_lip;
-                lip_i_m = side? lip_i_m+width_lip:lip_i_m-width_lip;
-                lip_i_d = side? lip_i_d+width_lip:lip_i_d-width_lip;
-            }
-
-            wing_draw(lip_i_u,lip_i_m,lip_i_d);
+        const rclit_Y   = model.core_l_e/2*erection_ratio[0]+model.core_l/2*erection_ratio[1];
+        const axis_Y    = init_point + model.hood_length;
+        const axis_E    = axis_Y + model.lip_i_length;
+        return{
+            rclit_Y:    rclit_Y,
+            axis_Y:     axis_Y,
+            axis_Y_end: axis_E
         }
-        
+    }
+    function config_wing(side,inout,center,center_add,model,extention) {
+        const extention_ratio = [extention/100,(100-extention)/100];
+        const fix_center    = side? center-center_add:center+center_add;
+        let   lip_smallest  = 0;
+        if(side){
+            lip_smallest    = model.lip_i_length_ru<model.lip_i_length_rm?model.lip_i_length_ru:model.lip_i_length_rm;
+            lip_smallest    = lip_smallest<model.lip_i_length_rd?lip_smallest:model.lip_i_length_rd;
+        }else{
+            lip_smallest    = model.lip_i_length_lu<model.lip_i_length_lm?model.lip_i_length_lu:model.lip_i_length_lm;
+            lip_smallest    = lip_smallest<model.lip_i_length_ld?lip_smallest:model.lip_i_length_ld;
+        }
+        lip_smallest = lip_smallest*extention_ratio[1];
+    
+        let minora_width_u  = side?-model.lip_i_length_ru+lip_smallest:model.lip_i_length_lu-lip_smallest;
+        let minora_width_m  = side?-model.lip_i_length_rm+lip_smallest:model.lip_i_length_lm-lip_smallest;
+        let minora_width_d  = side?-model.lip_i_length_rd+lip_smallest:model.lip_i_length_ld-lip_smallest;
+        const width_lip = model.lip_i_width*extention_ratio[1];
+    
+        let extention_temp  = (50-extention)/100;
+        if(extention_temp<0) extention_temp = 0;
+        minora_width_u  = minora_width_u*extention_ratio[0] - minora_width_u*extention_temp;
+        minora_width_m  = minora_width_m*extention_ratio[0] - minora_width_m*extention_temp;
+        minora_width_d  = minora_width_d*extention_ratio[0] - minora_width_d*extention_temp;
+    
+        if(inout){
+            minora_width_u  = side? minora_width_u+width_lip:minora_width_u-width_lip;
+            minora_width_m  = side? minora_width_m+width_lip:minora_width_m-width_lip;
+            minora_width_d  = side? minora_width_d+width_lip:minora_width_d-width_lip;
+        }
+        return {
+            center:         center,
+            center_fixed:   fix_center,
+            minora_length:  model.lip_i_length,
+            minora_width_u: minora_width_u,
+            minora_width_m: minora_width_m,
+            minora_width_d: minora_width_d
+        }
+    }
+    ////--------------------- config ---------------------//
+    ////--------------------- drawing ---------------------//
+    function draw_wing(canvas,config_shape,config_axis){
+        canvas.moveTo(config_shape.center, config_axis.axis_Y + config_axis.rclit_Y/3);
+        canvas.bezierCurveTo(
+            config_shape.center_fixed + config_shape.minora_width_u/4, config_axis.axis_Y + config_axis.rclit_Y/3 + config_shape.minora_length/15,
+            config_shape.center_fixed + config_shape.minora_width_u/2, config_axis.axis_Y + config_shape.minora_length*2/15,
+            config_shape.center_fixed + config_shape.minora_width_u*3/4, config_axis.axis_Y + config_shape.minora_length*3/15,
+            );
+        canvas.bezierCurveTo(
+            config_shape.center_fixed + config_shape.minora_width_u, config_axis.axis_Y + config_shape.minora_length*4/15,
+            config_shape.center_fixed + (2*config_shape.minora_width_u+config_shape.minora_width_m)/3, config_axis.axis_Y + config_shape.minora_length*5/15,
+            config_shape.center_fixed + (config_shape.minora_width_u+2*config_shape.minora_width_m)/3, config_axis.axis_Y + config_shape.minora_length*6/15,
+            );
+        canvas.bezierCurveTo(
+            config_shape.center_fixed + config_shape.minora_width_m, config_axis.axis_Y + config_shape.minora_length*7/15,
+            config_shape.center_fixed + config_shape.minora_width_m, config_axis.axis_Y + config_shape.minora_length*8/15,
+            config_shape.center_fixed + (config_shape.minora_width_d+2*config_shape.minora_width_m)/3, config_axis.axis_Y + config_shape.minora_length*9/15
+            );
+        canvas.bezierCurveTo(
+            config_shape.center_fixed + (2*config_shape.minora_width_d+config_shape.minora_width_m)/3, config_axis.axis_Y + config_shape.minora_length*10/15,
+            config_shape.center_fixed + config_shape.minora_width_d, config_axis.axis_Y + config_shape.minora_length*11/15,
+            config_shape.center_fixed + config_shape.minora_width_d*3/4, config_axis.axis_Y + config_shape.minora_length*12/15
+            );
+        canvas.bezierCurveTo(
+            config_shape.center_fixed + config_shape.minora_width_d/2, config_axis.axis_Y + config_shape.minora_length*13/15,
+            config_shape.center_fixed + config_shape.minora_width_d/4, config_axis.axis_Y + config_shape.minora_length*14/15,
+            config_shape.center, config_axis.axis_Y_end
+            );
+    }
+    function draw_wing_clipp(canvas,minora_ddirection,center,config_axis) {
+        if(minora_ddirection){
+            canvas.lineTo(center*2, config_axis.axis_Y_end);
+            canvas.lineTo(center*2, config_axis.axis_Y + config_axis.rclit_Y/3);
+            canvas.lineTo(center,   config_axis.axis_Y + config_axis.rclit_Y/3);
+        }else{
+            canvas.lineTo(0,        config_axis.axis_Y_end);
+            canvas.lineTo(0,        config_axis.axis_Y + config_axis.rclit_Y/3);
+            canvas.lineTo(center,   config_axis.axis_Y + config_axis.rclit_Y/3);
+        }      
+    }
+    ////--------------------- drawing ---------------------//
+
+    function fepart_wing(canvas,init_point,center,model,extention,erection,center_add) {
+        const config_axis = config_axis_Y(init_point,model,erection);
+        let config_shape  = null;
         //덮는 lip 클리핑
         canvas.beginPath();
-        if(lip_direction){
-            wing_pair(true, model.lip_i_width,true);
-            canvas.lineTo(center*2, axis_E);
-            canvas.lineTo(center*2, axis_Y + rclit_y/3);
-            canvas.lineTo(center, axis_Y + rclit_y/3);
-        }else{
-            wing_pair(false,model.lip_i_width,true);
-            canvas.lineTo(0, axis_E);
-            canvas.lineTo(0, axis_Y + rclit_y/3);
-            canvas.lineTo(center, axis_Y + rclit_y/3);
-        }        
+        config_shape = config_wing(lip_direction,true,center,center_add,model,extention);
+        draw_wing(canvas,config_shape,config_axis);
+        draw_wing_clipp(canvas,lip_direction,center,config_axis);
         canvas.closePath();
         canvas.save();
         canvas.clip();
         //안쪽 lip 그리기
         canvas.beginPath();
         if(lip_direction){
-            wing_pair(false,model.lip_i_width,false);
-            wing_pair(false,model.lip_i_width,true);
+            config_shape = config_wing(false,false,center,center_add,model,extention);
+            draw_wing(canvas,config_shape,config_axis);            
+            config_shape = config_wing(false,true,center,center_add,model,extention);
+            draw_wing(canvas,config_shape,config_axis);
         }else{
-            wing_pair(true,model.lip_i_width,false);
-            wing_pair(true,model.lip_i_width,true);
+            config_shape = config_wing(true,false,center,center_add,model,extention);
+            draw_wing(canvas,config_shape,config_axis);            
+            config_shape = config_wing(true,true,center,center_add,model,extention);
+            draw_wing(canvas,config_shape,config_axis);
         }
         canvas.stroke();
         //안쪽 lip 클리핑
         canvas.beginPath();
-        if(lip_direction){
-            wing_pair(false,model.lip_i_width,true);
-            canvas.lineTo(0, axis_E);
-            canvas.lineTo(0, axis_Y + rclit_y/3);
-            canvas.lineTo(center, axis_Y + rclit_y/3);
-        }else{
-            wing_pair(true, model.lip_i_width,true);
-            canvas.lineTo(center*2, axis_E);
-            canvas.lineTo(center*2, axis_Y + rclit_y/3);
-            canvas.lineTo(center, axis_Y + rclit_y/3);
-        }
+        config_shape = config_wing(!lip_direction,true,center,center_add,model,extention);
+        draw_wing(canvas,config_shape,config_axis);
+        draw_wing_clipp(canvas,!lip_direction,center,config_axis);
         canvas.closePath();
         canvas.save();
         canvas.clip();
@@ -606,11 +543,15 @@ import init, { test_alert, new_info,
         // 클리핑 외부영역 그리기
         canvas.beginPath();
         if(lip_direction){
-            wing_pair(true,model.lip_i_width,false);
-            wing_pair(true,model.lip_i_width,true);
+            config_shape = config_wing(true,false,center,center_add,model,extention);
+            draw_wing(canvas,config_shape,config_axis);            
+            config_shape = config_wing(true,true,center,center_add,model,extention);
+            draw_wing(canvas,config_shape,config_axis);            
         }else{
-            wing_pair(false,model.lip_i_width,false);
-            wing_pair(false,model.lip_i_width,true);
+            config_shape = config_wing(false,false,center,center_add,model,extention);
+            draw_wing(canvas,config_shape,config_axis);            
+            config_shape = config_wing(false,true,center,center_add,model,extention);
+            draw_wing(canvas,config_shape,config_axis);            
         }
         canvas.stroke();
     }
@@ -704,7 +645,6 @@ import init, { test_alert, new_info,
             ctx.strokeStyle = "rgb(255, 150, 150)";
             length_scale(ctx,ratio);
             fepart_top(ctx,init_point,canvas_center,draw,state,horny,fix_center_add);
-            ctx.strokeStyle = "rgb(150, 255, 150)";
             fepart_wing(ctx,init_point,canvas_center,draw,state,horny,fix_center_add);
             fepart_anus(ctx,init_point,canvas_center,draw,ratio,wrinkle_size);
         }
