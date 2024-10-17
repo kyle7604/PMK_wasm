@@ -627,7 +627,7 @@ import init, { test_alert, new_info,
             length_scale(ctx,ratio);
             fepart_top(ctx,init_point,canvas_center,draw,state,horny,fix_center_add);
             fepart_wing(ctx,init_point,canvas_center,draw,state,horny,fix_center_add);
-            // fepart_anus(ctx,init_point,canvas_center,draw,ratio,wrinkle_size);
+            fepart_anus(ctx,init_point,canvas_center,draw,ratio,wrinkle_size);
         }
     }
 
