@@ -706,7 +706,7 @@ import init, { test_alert, new_info,
             fepart_top(ctx,init_point,canvas_center,draw,state,horny,fix_center_add);
             ctx.strokeStyle = "rgb(150, 255, 150)";
             fepart_wing(ctx,init_point,canvas_center,draw,state,horny,fix_center_add);
-            // fepart_anus(ctx,init_point,canvas_center,draw,ratio,wrinkle_size);
+            fepart_anus(ctx,init_point,canvas_center,draw,ratio,wrinkle_size);
         }
     }
 
