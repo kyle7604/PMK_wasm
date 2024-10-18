@@ -7,11 +7,14 @@
     <script type="importmap">
         {
             "imports": {
-                "wasm_module": "./model_maker.js"
+                "wasm_module": "./model_maker.js",
+                "model_maker": "./model_mk.js"
             }
         }
     </script>
-    <script type="module" src="./module.js"></script>
+    <script type="module" src="./window_ctr.js"></script>
+    <script type="module" src="./model_mk.js"></script>
+    <script type="module" src="./part_fe.js"></script>
     <link href="./main.css" rel="stylesheet" type="text/css" />
 </head>
 <body>
